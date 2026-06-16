@@ -1,473 +1,158 @@
-# 🎹 Neil's Linux Music Production Recovery Guide
+# Linux Music Production Recovery Toolkit
 
-This repository contains the configuration and documentation required to reconstruct my Windows VST workflow on Arch Linux / CachyOS using REAPER, yabridge, and a dedicated Wine environment.
+A recovery and deployment toolkit for Linux musicians using Windows VST plugins through Wine, yabridge, and REAPER.
 
-The primary goal of this setup is **stability**, not novelty.
+This repository was created to solve a common problem in Linux audio production:
 
-The entire environment is intentionally pinned to Wine Staging 9.21 because newer Wine versions introduced plugin GUI and compatibility issues when used with REAPER and yabridge.
+Wine updates can occasionally introduce regressions that affect plugin scanning, plugin GUI behavior, or DAW compatibility. While newer Wine versions may improve gaming and application support, they are not always ideal for music-production workflows.
 
----
+Rather than freezing the entire system on an older Wine version, this project isolates music production into its own dedicated environment using:
 
-# ⚠️ Important Design Philosophy
+* Wine Staging 9.21
+* A dedicated Wine prefix
+* yabridge
+* yabridgectl
+* REAPER
 
-This system intentionally separates music production from the system Wine installation.
-
-Current system Wine may be:
-
-```text
-wine-staging 11.x
-wine-cachyos-opt 10.x
-Proton 11.x
-```
-
-These versions are free to update normally.
-
-Music production uses a completely isolated runtime:
-
-```text
-~/.local/share/audio-wine
-```
-
-which contains:
-
-```text
-Wine Staging 9.21
-```
-
-This prevents system updates from breaking plugin compatibility.
-
-Do not casually upgrade the audio Wine environment.
+This allows the rest of the system to continue updating normally while preserving a known-working audio environment.
 
 ---
 
-# Architecture Overview
+## Features
 
-```text
-Linux Host
-│
-├── REAPER
-│
-├── System Wine
-│   ├── Games
-│   ├── Steam
-│   └── General Applications
-│
-└── Music Production Environment
-    │
-    ├── Wine Staging 9.21
-    │   └── ~/.local/share/audio-wine
-    │
-    ├── Dedicated Wine Prefix
-    │   └── ~/.wine_music
-    │
-    ├── Yabridge
-    │
-    ├── Yabridgectl
-    │
-    ├── Linux_VST
-    │
-    └── External Sample Libraries
-```
+* Isolated Wine runtime for audio production
+* Dedicated Wine prefix for plugins and audio software
+* Automatic yabridge deployment
+* Automatic environment configuration
+* Recovery from backup archives
+* Fallback reconstruction using archived Wine packages
+* Compatible with Arch Linux and CachyOS
 
 ---
 
-# Repository Contents
+## Repository Structure
 
 ```text
 music-system-backup/
 ├── README.md
+├── MANUAL_INSTALL.md
+├── plugin-list.md
+├── install.sh
+├── backup.sh
+├── .zshrc_snippet
 ├── yabridge/
 │   └── yabridge.toml
-├── yabridgectl/
-│   └── config.toml
-└── zsh/
-    └── music-env.zsh
-```
-
-These files are small configuration files only.
-
-Large assets are stored separately.
-
----
-
-# Required Backup Assets
-
-This repository alone is NOT enough to fully restore the studio.
-
-The following assets must also be preserved:
-
-## Audio Runtime
-
-```text
-~/.local/share/audio-wine
-```
-
-Contains:
-
-```text
-Wine Staging 9.21
-```
-
-Size:
-
-```text
-~490 MB
+└── yabridgectl/
+    └── config.toml
 ```
 
 ---
 
-## Music Prefix
+## Quick Start
 
-```text
-~/.wine_music
-```
-
-Contains:
-
-```text
-Plugin support files
-Registry data
-Plugin application data
-Wine configuration
-```
-
-Size:
-
-```text
-~2.3 GB
-```
-
----
-
-## Plugin Installers
-
-External backup location.
-
-Contains installers for:
-
-* FabFilter
-* Native Instruments
-* Kontakt
-* Superior Drummer
-* Analog Obsession
-* Other production plugins
-
----
-
-## Sample Libraries
-
-Stored separately.
-
-Examples:
-
-* Kontakt Libraries
-* Superior Drummer Libraries
-
-These are intentionally NOT included in the Wine environment.
-
----
-
-# Recovery Level 1 (Preferred)
-
-Use this when backup archives are available.
-
-## Step 1
-
-Install:
+Clone the repository:
 
 ```bash
-sudo pacman -S reaper yabridge yabridgectl --needed
+git clone https://github.com/neilhege10-svg/music-system-backup
+cd music-system-backup
 ```
+
+Make the installer executable:
+
+```bash
+chmod +x install.sh
+```
+
+Run the installer:
+
+```bash
+./install.sh
+```
+
+The installer will automatically:
+
+* Install required packages
+* Restore or recreate the isolated Wine runtime
+* Deploy yabridge configuration
+* Configure environment variables
+* Create a dedicated Wine prefix
+* Run yabridgectl synchronization
 
 ---
 
-## Step 2
+## Important: Verify Plugin Paths
 
-Restore:
+The installer automatically deploys the included `yabridgectl/config.toml` file.
+
+However, the plugin directory paths defined in this file are system-specific and may not match your storage layout.
+
+After running the installer, review:
 
 ```text
-~/.local/share/audio-wine
+~/.config/yabridgectl/config.toml
 ```
 
-from backup.
+and verify that the `plugin_dirs` entry points to your actual Windows VST location.
 
----
+Example:
 
-## Step 3
-
-Restore:
-
-```text
-~/.wine_music
+```toml
+plugin_dirs = [
+'/run/media/USERNAME/DRIVE_NAME/Linux_VST'
+]
 ```
 
-from backup.
-
----
-
-## Step 4
-
-Deploy configuration files.
-
-```bash
-mkdir -p ~/.config/yabridge
-mkdir -p ~/.config/yabridgectl
-```
-
-Copy repository files:
-
-```bash
-cp yabridge/yabridge.toml ~/.config/yabridge/
-cp yabridgectl/config.toml ~/.config/yabridgectl/
-```
-
----
-
-## Step 5
-
-Restore shell configuration.
-
-Add the environment variables from:
-
-```text
-zsh/music-env.zsh
-```
-
-to:
-
-```bash
-~/.zshrc
-```
-
-Reload:
-
-```bash
-source ~/.zshrc
-```
-
----
-
-## Step 6
-
-Verify Wine loader.
-
-```bash
-$WINELOADER --version
-```
-
-Expected:
-
-```text
-wine-9.21 (Staging)
-```
-
----
-
-## Step 7
-
-Rebuild plugin bridges.
+If your VST collection is stored on a different drive, partition, or mount point, update the path accordingly before running:
 
 ```bash
 yabridgectl sync --prune
 ```
 
+You can verify the correct mount location using:
+
+```bash
+lsblk -f
+```
+
+or by inspecting the mounted drive in your file manager.
+
+Failure to update the plugin path may result in yabridge detecting no plugins during synchronization.
+
+--- 
+
+## Included Components
+
+### Audio Wine Runtime
+
+Dedicated Wine Staging 9.21 installation used exclusively for music production.
+
+### Wine Prefix
+
+Dedicated Wine environment for Windows plugins and audio software.
+
+### yabridge Configuration
+
+Preconfigured bridge settings for Windows VST integration.
+
+### Recovery Scripts
+
+Automated restoration and deployment tools.
+
 ---
 
-## Step 8
+## Manual Installation
 
-Open REAPER.
-
-Clear plugin cache.
-
-Run full plugin rescan.
-
-Studio restored.
-
----
-
-# Recovery Level 2 (Reinstall Plugins)
-
-Use if:
+If you prefer to rebuild everything manually or want to understand how the system works internally, see:
 
 ```text
-~/.wine_music
-```
-
-is unavailable.
-
----
-
-## Step 1
-
-Restore:
-
-```text
-~/.local/share/audio-wine
+MANUAL_INSTALL.md
 ```
 
 ---
 
-## Step 2
+## Disclaimer
 
-Deploy configuration files.
+This repository focuses on the Wine, yabridge, and plugin-hosting environment.
 
----
-
-## Step 3
-
-Create fresh prefix.
-
-```bash
-$WINELOADER winecfg
-```
-
-This automatically creates:
-
-```text
-~/.wine_music
-```
-
----
-
-## Step 4
-
-Reinstall plugins from archived installers.
-
----
-
-## Step 5
-
-Run:
-
-```bash
-yabridgectl sync --prune
-```
-
----
-
-## Step 6
-
-Rescan inside REAPER.
-
----
-
-# Recovery Level 3 (Disaster Recovery)
-
-Use only if:
-
-* Backups are lost
-* Cloud backups are lost
-* External drives are lost
-* Only this Git repository remains
-
----
-
-## Recreate Audio Wine
-
-Create directory:
-
-```bash
-mkdir -p ~/.local/share/audio-wine
-```
-
-Download Wine Staging 9.21:
-
-```bash
-wget https://archive.archlinux.org/packages/w/wine-staging/wine-staging-9.21-1-x86_64.pkg.tar.zst
-```
-
-Extract:
-
-```bash
-tar -C ~/.local/share/audio-wine -xavf wine-staging-9.21-1-x86_64.pkg.tar.zst
-```
-
-Remove archive:
-
-```bash
-rm wine-staging-9.21-1-x86_64.pkg.tar.zst
-```
-
-Verify:
-
-```bash
-~/.local/share/audio-wine/usr/bin/wine --version
-```
-
-Expected:
-
-```text
-wine-9.21 (Staging)
-```
-
----
-
-## Recreate Music Prefix
-
-```bash
-export WINELOADER="$HOME/.local/share/audio-wine/usr/bin/wine"
-export WINEPREFIX="$HOME/.wine_music"
-
-$WINELOADER winecfg
-```
-
----
-
-## Reinstall Plugins
-
-Use archived installers.
-
-Restore sample libraries.
-
-Run:
-
-```bash
-yabridgectl sync --prune
-```
-
-Rescan REAPER.
-
----
-
-# Why Wine 9.21?
-
-Historical note:
-
-Newer Wine versions introduced issues affecting REAPER and yabridge workflows.
-
-Observed issues included:
-
-* Plugin GUI interaction bugs
-* Window embedding issues
-* Plugin scanning instability
-* Various compatibility regressions reported by Linux audio users
-
-Wine Staging 9.21 was identified as the last known stable version for this workflow.
-
-The audio runtime is intentionally frozen to preserve project compatibility and workflow reliability.
-
-Future upgrades should only be performed after thorough testing.
-
----
-
-# Maintenance
-
-After changing any music-production configuration:
-
-```bash
-cp ~/.config/yabridge/yabridge.toml ./yabridge/
-cp ~/.config/yabridgectl/config.toml ./yabridgectl/
-```
-
-Commit changes:
-
-```bash
-git add .
-git commit -m "Update music environment"
-git push
-```
-
-Keep backups current.
-
-Future Neil will appreciate it.
+Commercial plugin installers, licenses, and sample libraries are not included and must be obtained separately from their respective vendors.
 
