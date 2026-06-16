@@ -88,11 +88,9 @@ echo "[4/7] Installing configuration files..."
 mkdir -p "$HOME/.config/yabridge"
 mkdir -p "$HOME/.config/yabridgectl"
 
-cp "$REPO_DIR/yabridge/yabridge.toml"
-"$HOME/.config/yabridge/yabridge.toml"
+cp "$REPO_DIR/yabridge/yabridge.toml" "$HOME/.config/yabridge/yabridge.toml"
 
-cp "$REPO_DIR/yabridgectl/config.toml"
-"$HOME/.config/yabridgectl/config.toml"
+cp "$REPO_DIR/yabridgectl/config.toml" "$HOME/.config/yabridgectl/config.toml"
 
 echo "Configs installed."
 
