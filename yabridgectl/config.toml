@@ -1,0 +1,8 @@
+plugin_dirs = ['/run/media/neil/LinuxExternal/Linux_VST']
+vst2_location = 'centralized'
+no_verify = false
+blacklist = []
+
+[last_known_config]
+wine_version = 'wine-9.21 (Staging)'
+yabridge_host_hash = 7850936922423895754

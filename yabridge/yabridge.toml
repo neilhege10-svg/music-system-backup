@@ -1,0 +1,7 @@
+[global]
+editor_coordinate_hack = true
+editor_hide_on_close = true
+
+[buses]
+wineloader = "/home/neil/.local/share/audio-wine/usr/bin/wine"
+environment = { "d2d" = "disabled", "d3d11" = "disabled" }

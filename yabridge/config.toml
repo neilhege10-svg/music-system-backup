@@ -1,0 +1,4 @@
+[hosts."*"]
+editor_xembed = false
+editor_force_dnd = true
+wine_mv_hack = true
