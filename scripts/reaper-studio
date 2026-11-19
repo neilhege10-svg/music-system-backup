@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+export WINELOADER="$HOME/.local/share/audio-wine/usr/bin/wine"
+export WINEPREFIX="$HOME/.wine_music"
+export WINE_WAYLAND_DRIVER=0
+export GDK_BACKEND=x11
+
+# Auto-mount LinuxExternal if plugged in but not mounted yet
+if [ ! -d "/run/media/neil/LinuxExternal/Linux_VST" ]; then
+    udisksctl mount -b /dev/disk/by-label/LinuxExternal 2>/dev/null || true
+fi
+
+exec /usr/bin/reaper "$@"

@@ -9,10 +9,9 @@ Wine updates can occasionally introduce regressions that affect plugin scanning,
 Rather than freezing the entire system on an older Wine version, this project isolates music production into its own dedicated environment using:
 
 * Wine Staging 9.21
-* A dedicated Wine prefix
-* yabridge
-* yabridgectl
-* REAPER
+* A dedicated Wine prefix (`~/.wine_music`)
+* yabridge & yabridgectl
+* REAPER with an isolated desktop launcher wrapper (`reaper-studio`)
 
 This allows the rest of the system to continue updating normally while preserving a known-working audio environment.
 
@@ -24,6 +23,7 @@ This allows the rest of the system to continue updating normally while preservin
 * Dedicated Wine prefix for plugins and audio software
 * Automatic yabridge deployment
 * Automatic environment configuration
+* Desktop launcher wrapper (`reaper-studio`) for Wayland/app launchers with automatic external drive mounting
 * Recovery from backup archives
 * Fallback reconstruction using archived Wine packages
 * Compatible with Arch Linux and CachyOS
@@ -40,6 +40,8 @@ music-system-backup/
 ├── install.sh
 ├── backup.sh
 ├── .zshrc_snippet
+├── scripts/
+│   └── reaper-studio
 ├── yabridge/
 │   └── yabridge.toml
 └── yabridgectl/
@@ -77,6 +79,7 @@ The installer will automatically:
 * Configure environment variables
 * Create a dedicated Wine prefix
 * Run yabridgectl synchronization
+* Deploy the `reaper-studio` desktop launcher wrapper and override REAPER's `.desktop` entry
 
 ---
 
@@ -118,7 +121,7 @@ or by inspecting the mounted drive in your file manager.
 
 Failure to update the plugin path may result in yabridge detecting no plugins during synchronization.
 
---- 
+---
 
 ## Included Components
 
@@ -133,6 +136,10 @@ Dedicated Wine environment for Windows plugins and audio software.
 ### yabridge Configuration
 
 Preconfigured bridge settings for Windows VST integration.
+
+### Desktop Launcher Wrapper (`reaper-studio`)
+
+Ensures REAPER inherits the isolated Wine runtime, prefix, and X11/XWayland flags when launched from desktop application menus (Rofi, Wofi, etc.), and automatically mounts external plugin storage if disconnected.
 
 ### Recovery Scripts
 
@@ -155,4 +162,3 @@ MANUAL_INSTALL.md
 This repository focuses on the Wine, yabridge, and plugin-hosting environment.
 
 Commercial plugin installers, licenses, and sample libraries are not included and must be obtained separately from their respective vendors.
-

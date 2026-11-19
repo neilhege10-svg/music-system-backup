@@ -6,12 +6,13 @@ This document explains how to manually rebuild the complete audio environment wi
 
 # Overview
 
-The system consists of four major components:
+The system consists of five major components:
 
 1. Wine Staging 9.21 runtime
 2. Dedicated Wine prefix
 3. yabridge
 4. yabridgectl
+5. REAPER desktop launcher wrapper (`reaper-studio`)
 
 The objective is to isolate audio production from the system Wine installation.
 
@@ -151,13 +152,13 @@ Example:
 ```toml
 plugin_dirs = ['/run/media/USERNAME/DRIVE_NAME/Linux_VST']
 ```
-(this is where you put your Plugins DLL files)
+*(This is where you put your plugin `.dll` and `.vst3` files).*
 
 ---
 
 # Step 7: Synchronize Plugins
 
-Once you have installed your plugins and put the dll in plugin_dirs, Run:
+Once you have installed your plugins and placed them in `plugin_dirs`, run:
 
 ```bash
 yabridgectl sync --prune
@@ -167,9 +168,29 @@ This creates the required bridge files and plugin wrappers.
 
 ---
 
-# Step 8: Configure REAPER
+# Step 8: Configure Desktop Launcher (Wayland / App Launchers)
 
-Open REAPER.
+Application launchers (Rofi, Wofi, etc.) do not load `~/.zshrc` environment variables, and external drives under `/run/media/` may not be mounted before REAPER starts.
+
+1. Deploy the wrapper script to `~/customscripts`:
+   ```bash
+   mkdir -p ~/customscripts
+   cp scripts/reaper-studio ~/customscripts/
+   chmod +x ~/customscripts/reaper-studio
+   ```
+
+2. Override the system `.desktop` entry:
+   ```bash
+   mkdir -p ~/.local/share/applications
+   cp /usr/share/applications/cockos-reaper.desktop ~/.local/share/applications/
+   sed -i "s|^Exec=.*|Exec=$HOME/customscripts/reaper-studio %F|" ~/.local/share/applications/cockos-reaper.desktop
+   ```
+
+---
+
+# Step 9: Configure REAPER
+
+Open REAPER from your application launcher or terminal.
 
 Perform a full plugin rescan.
 
@@ -235,15 +256,20 @@ Keeping libraries independent makes backups significantly smaller and simplifies
 
 ---
 
-if you want to install plugins run this command
+## Installing Windows Plugins
 
-[wine "path/to/your/plugin/installer"]
+Always install audio plugins inside a terminal with your Zsh environment loaded (or explicitly invoke `$WINELOADER`) so they install into `~/.wine_music` using Wine 9.21 rather than system Wine:
+
+```bash
+$WINELOADER "path/to/your/plugin/installer.exe"
+```
 
 ---
 
-for general purpose wine, use gwine instead of wine
+## General Purpose Wine
 
-Example:
-[gwine "~/Downloads/game.exe"]
+For non-audio software or games, use `gwine` instead of `wine`:
 
-
+```bash
+gwine "~/Downloads/game.exe"
+```
