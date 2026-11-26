@@ -5,3 +5,5 @@ export WINE_WAYLAND_DRIVER=0
 export GDK_BACKEND=x11
 
 alias gwine='WINEPREFIX=~/.wine_general /usr/bin/wine'
+alias mwine='WINEPREFIX=~/.wine_music WINESERVER=/home/neil/.local/share/audio-wine/usr/bin/wineserver /home/neil/.local/share/audio-wine/usr/bin/wine'
+
