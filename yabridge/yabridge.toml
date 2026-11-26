@@ -1,7 +1,11 @@
-[global]
-editor_coordinate_hack = true
-editor_hide_on_close = true
+# yabridge plugin config
+# install.sh copies this to ~/.vst/yabridge/ and ~/.vst3/yabridge/,
+# which is the only place yabridge looks for it.
+#
+# Section names are glob patterns matched against plugin file names.
+# ["*"] applies to every plugin without its own section.
 
-[buses]
-wineloader = "/home/neil/.local/share/audio-wine/usr/bin/wine"
-environment = { "d2d" = "disabled", "d3d11" = "disabled" }
+["*"]
+# Uncomment if dragging things (e.g. SD3 MIDI grooves) from a plugin
+# into REAPER doesn't work:
+# editor_force_dnd = true
